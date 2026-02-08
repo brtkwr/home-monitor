@@ -14,33 +14,36 @@ def main():
     current_ip = session.get("http://ifconfig.me")._content.decode()
     print("Current IP is: %s" % current_ip)
 
-    headers = {"Authorization": "Bearer %s" % CloudFlare.token}
-    res = session.get(endpoint, params={"type": "A"}, headers=headers).json()
-    skipped = []
-    for i in res.get("result"):
-        name = i.get("name")
-        if i.get("name") in CloudFlare.records:
-            if current_ip == i.get("content"):
-                skipped.append(name)
-                continue
-            else:
-                payload = {
-                    "type": "A",
-                    "name": name,
-                    "content": current_ip,
-                    "proxied": False,
-                }
-                print(
-                    name,
-                    session.put(
-                        "{endpoint}/{record_id}".format(
-                            endpoint=endpoint, record_id=i.get("id")
-                        ),
-                        json=payload,
-                        headers=headers,
-                    )._content,
-                )
-    print("Skipping {}".format(", ".join(skipped)))
+    headers = {"Authorization": f"Bearer {CloudFlare.token}"}
+    res = session.get(endpoint, params={"type": "A"}, headers=headers)
+    body = res.json()
+    if res.ok:
+        for i in body.get("result"):
+            name = i.get("name")
+            if i.get("name") in CloudFlare.records:
+                if current_ip == i.get("content"):
+                    skipped.append(name)
+                    continue
+                else:
+                    payload = {
+                        "type": "A",
+                        "name": name,
+                        "content": current_ip,
+                        "proxied": False,
+                    }
+                    print(
+                        name,
+                        session.put(
+                            "{endpoint}/{record_id}".format(
+                                endpoint=endpoint, record_id=i.get("id")
+                            ),
+                            json=payload,
+                            headers=headers,
+                        )._content,
+                    )
+        print("Skipping {}".format(", ".join(skipped)))
+    else:
+        print(f"Error response from Cloudflare: {body}")
 
 
 if __name__ == "__main__":

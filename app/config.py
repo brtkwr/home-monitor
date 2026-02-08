@@ -8,7 +8,7 @@ credentials = dict(
 )
 
 measurement = "nodemcu"
-endpoint = "http://192.168.8.%i/bme280"
+endpoint = "http://192.168.1.%i/bme280"
 rooms = [100, 120]
 
 interval = 10  # seconds between polling
@@ -26,7 +26,7 @@ class OctopusEnergy:
 
 class CloudFlare:
     email = "brtknr@bath.edu"
-    zone = "bab7acfb3951e5efe21ee3b7ccb83356"
-    records = {"dash.rawn.uk"}
+    zone = secret.cloudflare_zone
+    records = {"dash.brtkwr.com"}
     interval = 30  # seconds between polling
     token = secret.cloudflare_token
